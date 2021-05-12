@@ -856,6 +856,72 @@ class Client extends EventEmitter {
 
         return Promise.all(chatIds.map(id => this.getChatById(id)));
     }
+
+    /// Dhomper
+    /**
+     * delete message by id
+     * @param  {string} id_serialized message id serialized
+     * @return {null}               return null
+     */
+    async deleteById(id_serialized) {
+        let msg = new Message(this)
+        return msg.deleteById(id_serialized)
+    }
+    /**
+     * download media files by id serialized
+     * @param  {string} id_serialized message id serialized
+     * @return {object}               object with name, type and data of file
+     */
+    async downloadMedia(id_serialized) {
+        let msg = new Message(this);
+        return msg.downloadMediaFiles(id_serialized)
+    }
+
+
+    /**
+     * Logs out the client, closing the current session
+     */
+    async forceLogout() {
+        await this.pupPage.evaluate(() => {
+            return window.Store.AppState.logout();
+        });
+
+        if (this._qrRefreshInterval) {
+            clearInterval(this._qrRefreshInterval);
+        }
+        await this.pupBrowser.close();
+        return  true
+    }
+
+
+    async qr(client) {
+        // Check if retry button is present
+        try
+        {
+            if(!this.pupPage)
+            {
+                return false
+            }
+            
+            var QR_RETRY_SELECTOR = 'div[data-ref] > span > button';
+            var qrRetry = await this.pupPage.$(QR_RETRY_SELECTOR);
+            if (qrRetry) {
+                await qrRetry.click();
+            }
+
+            // Wait for QR Code
+            const QR_CANVAS_SELECTOR = 'canvas';
+            await this.pupPage.waitForSelector(QR_CANVAS_SELECTOR, { timeout: this.options.qrTimeoutMs });
+            const qrImgData = await this.pupPage.$eval(QR_CANVAS_SELECTOR, canvas => [].slice.call(canvas.getContext('2d').getImageData(0, 0, 264, 264).data));
+            const qr = jsQR(qrImgData, 264, 264).data;
+            return qr
+        }
+        catch(e)
+        {
+            console.log(e)
+            return false
+        }
+    }
 }
 
 module.exports = Client;

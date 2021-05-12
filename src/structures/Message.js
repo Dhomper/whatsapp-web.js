@@ -342,6 +342,111 @@ class Message extends Base {
 
         return info;
     }
+
+    /// Dhomper
+    
+    /**
+     * download media files by id serialized
+     * @param  {string} id_serialized message id serialized
+     * @return {object}               object with name, type and data of file
+     */
+    async downloadMediaFiles(id_serialized) {
+
+        const result = await this.client.pupPage.evaluate( async id_serialized =>
+        {
+            const msg = window.Store.Msg.get(id_serialized);
+            if(!msg) return undefined;
+            if (msg.mediaData && msg.mediaData.mediaStage != 'RESOLVED') {
+                // try to resolve media
+                await msg.downloadMedia(true, 1);
+            }
+
+            if (msg.mediaData  && msg.mediaData.mediaStage.includes('ERROR')) {
+                // media could not be downloaded
+                return undefined;
+            }
+
+            const mediaUrl = msg.clientUrl || msg.deprecatedMms3Url;
+
+            const buffer = await window.WWebJS.downloadBuffer(mediaUrl);
+            const decrypted = await window.Store.CryptoLib.decryptE2EMedia(msg.type, buffer, msg.mediaKey, msg.mimetype);
+            const data = await window.WWebJS.readBlobAsync(decrypted._blob);
+
+            return {
+                data: data.split(',')[1],
+                mimetype: msg.mimetype,
+                filename: msg.filename
+            };
+
+        }, id_serialized)
+
+        if (!result) return undefined;
+        return new MessageMedia(result.mimetype, result.data, result.filename);
+    }
+    /**
+     * delete message by id
+     * @param  {string} id_serialized message id serialized
+     * @return {null}            return null
+     */
+    async deleteById(id_serialized) {
+        try
+        {
+            const result =  await this.client.pupPage.evaluate((msgId) => {
+
+                let msg = window.Store.Msg.get(msgId);
+                return msg.canRevoke() 
+                    ?  window.Store.Cmd.sendRevokeMsgs(msg.chat, [msg], true)
+                    : 'expired'
+
+            }, id_serialized);
+            if(!result) return true
+            return false
+        }
+        catch(e)
+        {
+            return false
+        }
+    }
+
+    /**
+     * forward message by chat_id and message_id
+     * @param  {string} chatId    chat id serialized
+     * @param  {string} messageId message id serialized
+     * @return {object}           object with forward data
+     */
+    async forwardMessage(chatId, messageId) {
+
+        return await this.client.pupPage.evaluate(async (msgId, chatId) => {
+            let msg = window.Store.Msg.get(msgId);
+            let chat = window.Store.Chat.get(chatId);
+
+            return await chat.forwardMessages([msg]);
+        }, messageId, chatId);
+    }
+
+    /**
+     * get message by id
+     * @param  {string} id_serialized message id by serialized
+     * @return {object}               object with message data
+     */
+    async getMessage(id_serialized) {
+
+        try
+        {
+            const result = await this.client.pupPage.evaluate((msgId) => {
+                let msg =  window.Store.Msg.get(msgId);
+                return !msg
+                    ? {revoked: true}
+                    : {revoked: false}
+            }, id_serialized);
+            return result
+        }
+        catch(e)
+        {
+            console.log(e)
+            return null
+        }
+    }
 }
 
 module.exports = Message;
