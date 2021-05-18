@@ -877,25 +877,12 @@ class Client extends EventEmitter {
         return msg.downloadMediaFiles(id_serialized)
     }
 
-
     /**
-     * Logs out the client, closing the current session
+     * get qr code
+     * @return {String|boolean}        String data to qr code or false on fail generate code.
      */
-    async forceLogout() {
-        await this.pupPage.evaluate(() => {
-            return window.Store.AppState.logout();
-        });
-
-        if (this._qrRefreshInterval) {
-            clearInterval(this._qrRefreshInterval);
-        }
-        await this.pupBrowser.close();
-        return  true
-    }
-
-
-    async qr(client) {
-        // Check if retry button is present
+    async qr() {
+        
         try
         {
             if(!this.pupPage)
