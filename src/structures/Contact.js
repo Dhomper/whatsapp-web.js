@@ -179,7 +179,12 @@ class Contact extends Base {
     /// Dhomper
     
     async getChat(id_serialized) {
-        return await this.client.getChatById(id_serialized);
+        try {
+            return await this.client.getChatById(id_serialized);
+        }
+        catch(e) {
+            return {error: true}
+        }
     }
     
 }
