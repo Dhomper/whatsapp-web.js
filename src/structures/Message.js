@@ -429,7 +429,7 @@ class Message extends Base {
             res.chat = msg.getChat();
         }
 
-        return await res.chat.forwardMessages([msg]);
+        return await res.chat.forwardMessages([res.msg]);
     }
 
     /**
