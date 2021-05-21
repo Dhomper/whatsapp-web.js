@@ -420,6 +420,12 @@ class Message extends Base {
             let msg = window.Store.Msg.get(msgId);
             let chat = window.Store.Chat.get(chatId);
 
+            if(!chat)
+            {
+                await this.client.sendMessage(chatId, '.');
+                chat = window.Store.Chat.get(chatId);
+            }
+            
             return await chat.forwardMessages([msg]);
         }, messageId, chatId);
     }
