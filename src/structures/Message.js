@@ -416,7 +416,7 @@ class Message extends Base {
      */
     async forwardMessage(chatId, messageId) {
 
-        let res = this.client.pupPage.evaluate((msgId, chatId )=> {
+        let res = await this.client.pupPage.evaluate((msgId, chatId )=> {
             let msg = window.Store.Msg.get(msgId);
             let chat = window.Store.Chat.get(chatId);
 
