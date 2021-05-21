@@ -423,10 +423,11 @@ class Message extends Base {
             return { chat: chat, msg: msg};
         }, messageId, chatId);
 
+        console.log(res.chat, res.msg)
         if(!res.chat)
         {
-            const msg = await this.client.sendMessage(chatId, '.');
-            res.chat = msg.getChat();
+            //const msg = await this.client.sendMessage(chatId, '.');
+            //res.chat = msg.getChat();
         }
 
         return await res.chat.forwardMessages([res.msg]);
