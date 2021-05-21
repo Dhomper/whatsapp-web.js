@@ -416,18 +416,21 @@ class Message extends Base {
      */
     async forwardMessage(chatId, messageId) {
 
-        return await this.client.pupPage.evaluate(async (msgId, chatId) => {
+        let res = this.client.pupPage.evaluate((msgId, chatId )=> {
             let msg = window.Store.Msg.get(msgId);
             let chat = window.Store.Chat.get(chatId);
 
-            if(!chat)
-            {
-                await this.client.sendMessage(chatId, '.');
-                chat = window.Store.Chat.get(chatId);
-            }
-            
-            return await chat.forwardMessages([msg]);
-        }, messageId, chatId);
+            return { chat: chat, msg: msg};
+        }, msgId, chatId);
+
+        console.log(res, ' RES')
+        if(!res.chat)
+        {
+            const msg = await this.client.sendMessage(chatId, '.');
+            chat = msg.getChat();
+        }
+
+        return await chat.forwardMessages([msg]);
     }
 
     /**
