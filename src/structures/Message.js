@@ -421,7 +421,7 @@ class Message extends Base {
             let chat = window.Store.Chat.get(chatId);
 
             return { chat: chat, msg: msg};
-        }, msgId, chatId);
+        }, messageId, chatId);
 
         console.log(res, ' RES')
         if(!res.chat)
