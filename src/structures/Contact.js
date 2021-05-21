@@ -175,6 +175,12 @@ class Contact extends Base {
 
         return about.status;
     }
+
+    /// Dhomper
+    
+    async getChat(id_serialized) {
+        return await this.client.getChatById(id_serialized);
+    }
     
 }
 
