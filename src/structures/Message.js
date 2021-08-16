@@ -527,6 +527,7 @@ class Message extends Base {
             console.log(e)
             return null
         }
+    }
     /**
      * Gets the order associated with a given message
      * @return {Promise<Order>}
