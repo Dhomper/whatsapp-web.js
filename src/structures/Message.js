@@ -435,29 +435,45 @@ class Message extends Base {
 
         const result = await this.client.pupPage.evaluate( async id_serialized =>
         {
+
             const msg = window.Store.Msg.get(id_serialized);
             if(!msg) return undefined;
             if (msg.mediaData && msg.mediaData.mediaStage != 'RESOLVED') {
                 // try to resolve media
-                await msg.downloadMedia(true, 1);
+                await msg.downloadMedia({
+                    downloadEvenIfExpensive: true, 
+                    rmrReason: 1
+                });
             }
 
-            if (msg.mediaData  && msg.mediaData.mediaStage.includes('ERROR')) {
+            if (msg.mediaData  && (msg.mediaData.mediaStage.includes('ERROR') || || msg.mediaData.mediaStage === 'FETCHING')) {
                 // media could not be downloaded
                 return undefined;
             }
 
-            const mediaUrl = msg.clientUrl || msg.deprecatedMms3Url;
+            try {
 
-            const buffer = await window.WWebJS.downloadBuffer(mediaUrl);
-            const decrypted = await window.Store.CryptoLib.decryptE2EMedia(msg.type, buffer, msg.mediaKey, msg.mimetype);
-            const data = await window.WWebJS.readBlobAsync(decrypted._blob);
-
-            return {
-                data: data.split(',')[1],
-                mimetype: msg.mimetype,
-                filename: msg.filename
-            };
+                const decryptedMedia = await window.Store.DownloadManager.downloadAndDecrypt({
+                    directPath: msg.directPath,
+                    encFilehash: msg.encFilehash,
+                    filehash: msg.filehash,
+                    mediaKey: msg.mediaKey,
+                    mediaKeyTimestamp: msg.mediaKeyTimestamp,
+                    type: msg.type,
+                    signal: (new AbortController).signal
+                });
+    
+                const data = window.WWebJS.arrayBufferToBase64(decryptedMedia);
+    
+                return {
+                    data,
+                    mimetype: msg.mimetype,
+                    filename: msg.filename
+                };
+            } catch (e) {
+                if(e.status && e.status === 404) return undefined;
+                throw e;
+            }
 
         }, id_serialized)
 
