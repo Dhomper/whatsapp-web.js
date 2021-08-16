@@ -11,6 +11,13 @@ const client = new Client({ puppeteer: { headless: false }, session: sessionCfg 
 // You can use an existing session and avoid scanning a QR code by adding a "session" object to the client options.
 // This object must include WABrowserId, WASecretBundle, WAToken1 and WAToken2.
 
+// You also could connect to an existing instance of a browser
+// { 
+//    puppeteer: {
+//        browserWSEndpoint: `ws://localhost:3000`
+//    }
+// }
+
 client.initialize();
 
 client.on('qr', (qr) => {
@@ -192,7 +199,7 @@ client.on('message', async msg => {
         const chat = await msg.getChat();
         // stops typing or recording in the chat
         chat.clearState();
-    } else if (msg.body === 'jumpto') {
+    } else if (msg.body === '!jumpto') {
         if (msg.hasQuotedMsg) {
             const quotedMsg = await msg.getQuotedMessage();
             client.interface.openChatWindowAt(quotedMsg.id._serialized);
