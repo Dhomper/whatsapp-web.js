@@ -475,7 +475,7 @@ class Message extends Base {
                 throw e;
             }
 
-        }, id_serialized)
+        }, id_serialized);
 
         if (!result) return undefined;
         return new MessageMedia(result.mimetype, result.data, result.filename);
@@ -493,15 +493,15 @@ class Message extends Base {
                 let msg = window.Store.Msg.get(msgId);
                 return msg.canRevoke() 
                     ?  window.Store.Cmd.sendRevokeMsgs(msg.chat, [msg], true)
-                    : 'expired'
+                    : 'expired';
 
             }, id_serialized);
-            if(!result) return true
-            return false
+            if(!result) return true;
+            return false;
         }
         catch(e)
         {
-            return false
+            return false;
         }
     }
 
@@ -534,14 +534,13 @@ class Message extends Base {
                 let msg =  window.Store.Msg.get(msgId);
                 return !msg
                     ? {revoked: true}
-                    : {revoked: false}
+                    : {revoked: false};
             }, id_serialized);
-            return result
+            return result;
         }
         catch(e)
         {
-            console.log(e)
-            return null
+            return null;
         }
     }
     /**
