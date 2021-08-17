@@ -939,8 +939,8 @@ class Client extends EventEmitter {
      * @return {null}               return null
      */
     async deleteById(id_serialized) {
-        let msg = new Message(this)
-        return msg.deleteById(id_serialized)
+        let msg = new Message(this);
+        return msg.deleteById(id_serialized);
     }
     /**
      * download media files by id serialized
@@ -949,7 +949,7 @@ class Client extends EventEmitter {
      */
     async downloadMedia(id_serialized) {
         let msg = new Message(this);
-        return msg.downloadMediaFiles(id_serialized)
+        return msg.downloadMediaFiles(id_serialized);
     }
 
     /**
@@ -962,7 +962,7 @@ class Client extends EventEmitter {
         {
             if(!this.pupPage)
             {
-                return false
+                return false;
             }
             
             var QR_RETRY_SELECTOR = 'div[data-ref] > span > button';
@@ -976,12 +976,11 @@ class Client extends EventEmitter {
             await this.pupPage.waitForSelector(QR_CANVAS_SELECTOR, { timeout: this.options.qrTimeoutMs });
             const qrImgData = await this.pupPage.$eval(QR_CANVAS_SELECTOR, canvas => [].slice.call(canvas.getContext('2d').getImageData(0, 0, 264, 264).data));
             const qr = jsQR(qrImgData, 264, 264).data;
-            return qr
+            return qr;
         }
         catch(e)
         {
-            console.log(e)
-            return false
+            return false;
         }
     }
 }
